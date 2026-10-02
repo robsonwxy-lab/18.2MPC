@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18.2 MPC — Estúdio Profissional</title>
+    
+    <!-- Motor de Áudio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- CONFIGURAÇÃO PARA INSTALAR COMO APLICATIVO (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('App instalável ativado com sucesso!', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('Erro ao ativar a instalação do App:', err);
+                    });
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="splash-screen" class="splash">
+        <div class="splash-content">
+            <div class="logo-grid">
+                <span></span><span></span><span></span>
+                <span></span><span></span><span></span>
+                <span></span><span></span><span></span>
+            </div>
+            <h1>18.2 MPC Studio</h1>
+            <p class="subtitle">Motor de Mixagem • Ferramenta Tesoura ✂️ • App Instalável</p>
+            <button id="btn-enter" class="btn-primary">INICIAR SISTEMA DE PRODUÇÃO</button>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-container hidden">
+        <header class="app-header">
+            <div class="header-left">
+                <span class="brand">18.2 MPC</span>
+                <span id="project-title" class="project-info">Afro House — Ultimate</span>
+                <span id="midi-status" class="badge" style="background:#e74c3c;">USB MIDI</span>
+                <button id="btn-bluetooth" class="btn-ctrl" style="color:#00f3ff; border-color:#00f3ff;">🔵 Conectar Bluetooth</button>
+            </div>
+            <div class="header-center">
+                <button id="btn-play" class="btn-ctrl">▶️ Play</button>
+                <button id="btn-stop" class="btn-ctrl">⏹️ Stop</button>
+                <div class="bpm-control">
+                    <label>BPM:</label>
+                    <input type="number" id="bpm-input" value="120" min="60" max="180">
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="btn-rec" class="btn-rec">⏺️ REC (Gravar)</button>
+                <button id="btn-export-wav" class="btn-action">💾 Exportar Master</button>
+                <button id="btn-profile-open" class="btn-icon" title="Perfil do Produtor">👤</button>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-target="tab-pads">Pads & Mixagem</button>
+            <button class="tab-btn" data-target="tab-seq">Sequenciador</button>
+            <button class="tab-btn" data-target="tab-score">Partitura ECAD</button>
+        </nav>
+
+        <main class="main-content">
+            <aside class="sidebar-genres">
+                <h3>Gêneros de Estúdio</h3>
+                <ul id="genre-list">
+                    <li class="active" data-genre="Afro House">Afro House</li>
+                    <li data-genre="Dance">Dance / Dancefloor</li>
+                    <li data-genre="Electronic">Electronic</li>
+                    <li data-genre="Beat">Beat</li>
+                    <li data-genre="Hip Hop">Hip Hop</li>
+                    <li data-genre="Deep House">Deep House</li>
+                </ul>
+            </aside>
+
+            <section class="workspace">
+                <div id="tab-pads" class="tab-pane active">
+                    <div class="pads-grid" id="pads-grid"></div>
+                    
+                    <div class="extra-pads-section">
+                        <h3 class="section-title">Expansão de Samples & Cartões de Corte (Exportação)</h3>
+                        <div class="extra-pads-grid">
+                            <!-- PAD A -->
+                            <div class="pad extra-pad" id="pad-ext-A">
+                                <span class="pad-cat">Custom A</span><span class="pad-name" id="name-ext-A">Vazio</span>
+                                <label for="import-ext-A" class="btn-import-mini">📥 Carregar Áudio</label>
+                                <input type="file" id="import-ext-A" accept="audio/*" style="display:none;">
+                                <div class="mix-card">
+                                    <div class="mix-ctrl"><label>▶️ Início(s)</label><input type="number" id="start-ext-A" value="0.0" min="0" step="0.1"></div>
+                                    <div class="mix-ctrl"><label>⏹️ Fim(s)</label><input type="number" id="end-ext-A" value="0.0" min="0" step="0.1"></div>
+                                    <button class="btn-cut" id="btn-cut-A" title="Exportar este corte">✂️</button>
+                                </div>
+                            </div>
+                            <!-- PAD B -->
+                            <div class="pad extra-pad" id="pad-ext-B">
+                                <span class="pad-cat">Custom B</span><span class="pad-name" id="name-ext-B">Vazio</span>
+                                <label for="import-ext-B" class="btn-import-mini">📥 Carregar Áudio</label>
+                                <input type="file" id="import-ext-B" accept="audio/*" style="display:none;">
+                                <div class="mix-card">
+                                    <div class="mix-ctrl"><label>▶️ Início(s)</label><input type="number" id="start-ext-B" value="0.0" min="0" step="0.1"></div>
+                                    <div class="mix-ctrl"><label>⏹️ Fim(s)</label><input type="number" id="end-ext-B" value="0.0" min="0" step="0.1"></div>
+                                    <button class="btn-cut" id="btn-cut-B" title="Exportar este corte">✂️</button>
+                                </div>
+                            </div>
+                            <!-- PAD C -->
+                            <div class="pad extra-pad" id="pad-ext-C">
+                                <span class="pad-cat">Custom C</span><span class="pad-name" id="name-ext-C">Vazio</span>
+                                <label for="import-ext-C" class="btn-import-mini">📥 Carregar Áudio</label>
+                                <input type="file" id="import-ext-C" accept="audio/*" style="display:none;">
+                                <div class="mix-card">
+                                    <div class="mix-ctrl"><label>▶️ Início(s)</label><input type="number" id="start-ext-C" value="0.0" min="0" step="0.1"></div>
+                                    <div class="mix-ctrl"><label>⏹️ Fim(s)</label><input type="number" id="end-ext-C" value="0.0" min="0" step="0.1"></div>
+                                    <button class="btn-cut" id="btn-cut-C" title="Exportar este corte">✂️</button>
+                                </div>
+                            </div>
+                            <!-- PAD D -->
+                            <div class="pad extra-pad" id="pad-ext-D">
+                                <span class="pad-cat">Custom D</span><span class="pad-name" id="name-ext-D">Vazio</span>
+                                <label for="import-ext-D" class="btn-import-mini">📥 Carregar Áudio</label>
+                                <input type="file" id="import-ext-D" accept="audio/*" style="display:none;">
+                                <div class="mix-card">
+                                    <div class="mix-ctrl"><label>▶️ Início(s)</label><input type="number" id="start-ext-D" value="0.0" min="0" step="0.1"></div>
+                                    <div class="mix-ctrl"><label>⏹️ Fim(s)</label><input type="number" id="end-ext-D" value="0.0" min="0" step="0.1"></div>
+                                    <button class="btn-cut" id="btn-cut-D" title="Exportar este corte">✂️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-seq" class="tab-pane">
+                    <div class="sequencer-grid" id="sequencer-grid"></div>
+                </div>
+
+                <div id="tab-score" class="tab-pane">
+                    <div class="score-card">
+                        <h2>Registo de Obra (Standard Global)</h2>
+                        <div id="score-meta" class="score-meta"></div>
+                        <pre id="score-ascii" class="score-ascii"></pre>
+                        <div class="score-actions">
+                            <button id="btn-gen-score" class="btn-primary">Atualizar Partitura</button>
+                            <button id="btn-download-score" class="btn-secondary">Baixar Partitura TXT</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="sidebar-mixer">
+                <h3>Mixer Master</h3>
+                <div class="mixer-channels">
+                    <div class="slider-group"><label>Pitch Master (DJ)</label><input type="range" id="master-pitch" min="-12" max="12" value="0" step="1"></div>
+                    <div class="slider-group"><label>Vocal Space FX</label><input type="range" id="fx-vocal" min="0" max="1" value="0" step="0.1"></div>
+                    <div class="slider-group"><label>Master Vol</label><input type="range" id="vol-master" min="-30" max="0" value="0" step="1"></div>
+                    <div class="slider-group"><label>Reverb Estúdio</label><input type="range" id="fx-reverb" min="0" max="1" value="0.2" step="0.05"></div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Registo do Produtor</h2>
+            <form id="profile-form">
+                <input type="text" id="prof-name" placeholder="Nome Artístico / Completo" required>
+                <input type="email" id="prof-email" placeholder="E-mail de Contacto" required>
+                <input type="text" id="prof-tag" placeholder="Tag ISRC (Ex: DJST)" required>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary">Salvar Perfil</button>
+                    <button type="button" id="btn-profile-close" class="btn-secondary">Fechar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Cérebro -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "18.2 MPC Studio",
+  "short_name": "18.2 MPC",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0b10",
+  "theme_color": "#f39c12",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3004/3004118.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
